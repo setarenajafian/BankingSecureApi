@@ -18,36 +18,51 @@ public class AuthController : ControllerBase
 
     public AuthController(IConfiguration config)
     {
-        _config = config; 
+        _config = config;
     }
 
     [HttpPost("login")]
     public IActionResult Login([FromBody] Models.LoginRequest login)
     {
-        if(login.Username == "admin" && login.Password == "Aa123")
+        if (login.Username == "admin" && login.Password == "Aa123")
         {
             var token = GenerateJwtToken(login.Username);
+
+            return Ok(new
+            {
+                token = token,
+                expires = DateTime.UtcNow.AddMinutes(
+                    Convert.ToDouble(_config["Jwt:ExpireMinutes"]))
+            });
         }
-        return Ok();
+
+        return Unauthorized(new { message = "Invalid username or password" });
     }
+
 
     private string GenerateJwtToken(string username)
     {
-        var jwtSettings = _config.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+        var securityKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+        new Claim(ClaimTypes.Name, username),
+        
+    };
 
         var token = new JwtSecurityToken(
-            issuer: jwtSettings["Issuer"],
-            audience: jwtSettings["Audience"],
-            claims: new[] { new Claim(ClaimTypes.Name, username) },
-            expires: DateTime.UtcNow.AddMinutes(
-                Convert.ToDouble(jwtSettings["ExpireMinutes"])),
-            signingCredentials: creds
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires : DateTime.UtcNow.AddMinutes(
+                Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
+            signingCredentials: credentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+
     }
 }

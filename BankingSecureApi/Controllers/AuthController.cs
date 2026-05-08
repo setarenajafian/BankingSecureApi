@@ -21,6 +21,8 @@ public class AuthController(IConfiguration config, IUserService userService, ILo
     private readonly IUserService _userService = userService;
     private readonly ILogger _logger = logger;
 
+    //این دیکشنری تعداد تلاش های ناموفق هر کاربر رو نگه میداره
+    private static Dictionary<string, int> loginAttempts = new();
     
     [HttpPost("login")]
     public IActionResult Login([FromBody] Models.LoginRequest login)
@@ -33,8 +35,38 @@ public class AuthController(IConfiguration config, IUserService userService, ILo
         };
 
 
-        //Implement secure logging for authentication events 
+        if (!users.ContainsKey(login.Username))
+        {
+            _logger.LogWarning("Login failed for non-existing user {Username}", login.Username);
+            return Unauthorized("Invalid username or password");
+        }
 
+        //قبل از بررسی رمز چک کنیم کاربر قفل نشده باشد
+        if (loginAttempts.ContainsKey(login.Username) && loginAttempts[login.Username] >= 5)
+        {
+            _logger.LogWarning("User {Username} locked due to too many login attempts", login.Username);
+            return StatusCode(423, "Account temporarily locked");
+        }
+
+
+        var user = users[login.Username];
+        var passwordValid = _userService.VerifyPassword(login.Password, user.PasswordHash);
+
+        if (!passwordValid)
+        {
+            if (loginAttempts.ContainsKey(login.Username))
+            {
+                loginAttempts[login.Username] = 0;
+            }
+            loginAttempts[login.Username] ++;
+
+            _logger.LogWarning("Invalid password for user {Username}", login.Username);
+            return Unauthorized("Invalid username or password");
+        }
+        loginAttempts.Remove(login.Username);  //اینجا بعد از لاگین موفق پاک می‌شود
+
+
+        //Implement secure logging for authentication events 
         //check attempts fot loggin
         _logger.LogInformation("login attempt for user : {Username}", login.Username);
 

@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-
+//Add API rate limiting to prevent abuse
 builder.Services.AddRateLimiter(Options =>
 {
     Options.AddFixedWindowLimiter("api", limiterOptions =>

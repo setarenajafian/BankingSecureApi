@@ -13,22 +13,45 @@ namespace BankingSecureApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController(IConfiguration config, IUserService userService) : ControllerBase        //request management
+public class AuthController(IConfiguration config, IUserService userService, ILogger logger) : ControllerBase        //request management
 {
     private readonly IConfiguration _config = config;
     private readonly IUserService _userService = userService;
+    private readonly ILogger _logger = logger;
 
     
     [HttpPost("login")]
     public IActionResult Login([FromBody] Models.LoginRequest login)
     {
+        //hard code : instance of users for testing 
         var users = new Dictionary<string, (string PasswordHash, string Role)>
         {
             {"Admin" , (_userService.HashPassword("Aa123"),"admin")},
             {"User" , (_userService.HashPassword("Bb123"),"user") }
         };
 
-        if(!users.ContainsKey(login.Username))
+
+        //Implement secure logging for authentication events 
+
+        //check attempts fot loggin
+        _logger.LogInformation("login attempt for user : {Username}", login.Username);
+
+        //check unsuccessful login
+        if (!users.ContainsKey(login.Username))
+        {
+            _logger.LogWarning("Invalid login attempt for username: {Username}", login.Username);
+            return Unauthorized("Invalid credentials");
+        }
+
+        //check successfull login
+        _logger.LogInformation("User {Username} logged in successfully", login.Username);
+
+
+
+
+
+        //authentication flow: check if user exists, validate password and if valid, generate and return a JWT token.
+        if (!users.ContainsKey(login.Username))
             return Unauthorized("Invalid credentials");
 
         var user = users[login.Username];

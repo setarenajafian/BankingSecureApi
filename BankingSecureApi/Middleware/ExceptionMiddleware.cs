@@ -11,12 +11,15 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
     {
         try
         {
+            // اجازه اجرای درخواست ادامه‌دار را بده
             await _next(context);
         }
         catch (Exception ex)
         {
+            // لاگ‌گیری امن – بدون نمایش جزئیات حساس
             _logger.LogError(ex, "unhandled exception occurred");
 
+            // ایجاد پاسخ استاندارد
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
 

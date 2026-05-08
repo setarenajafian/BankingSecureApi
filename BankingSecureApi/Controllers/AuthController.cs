@@ -88,7 +88,6 @@ public class AuthController(IConfiguration config, IUserService userService, ILo
         if (!users.ContainsKey(login.Username))
             return Unauthorized("Invalid credentials");
 
-        var user = users[login.Username];
 
         var PasswoordValid = _userService.VerifyPassword(login.Password, user.PasswordHash);
 

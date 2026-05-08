@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BankingSecureApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = "Admin")]
+[EnableRateLimiting("api")]
 public class AdminController : ControllerBase
 {
     [HttpGet("dashboard")]
@@ -15,7 +17,7 @@ public class AdminController : ControllerBase
         return Ok("Welcome Admin");
     }
 
-    [HttpGet("account")]
+    [HttpGet("accounts")]
     public IActionResult GetAllAccounts()
     {
         return Ok(new[] { "Account 1", "Account 2" });

@@ -7,44 +7,46 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using BankingSecureApi.Models;
+using BankingSecureApi.Services;
 
 namespace BankingSecureApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController : ControllerBase        //request management
 {
     private readonly IConfiguration _config;
+    private readonly IUserService _userService;
 
-    public AuthController(IConfiguration config)
+    public AuthController(IConfiguration config,IUserService userService)
     {
         _config = config;
+        _userService = userService;
     }
 
     [HttpPost("login")]
     public IActionResult Login([FromBody] Models.LoginRequest login)
     {
-        if (login.Username == "admin" && login.Password == "Aa123")
+        var users = new Dictionary<string, (string PasswordHash, string Role)>
         {
-            var token = GenerateJwtToken("admin","Admin");
+            {"Admin" , (_userService.HashPassword("Aa123"),"admin")},
+            {"User" , (_userService.HashPassword("Bb123"),"user") }
+        };
 
-            return Ok(new
-            {
-                token = token
-            });
-        }
-        if ( login.Username == "setare" && login.Password == "Aa123")
-        {
-            var token = GenerateJwtToken("setare", "User");
+        if(!users.ContainsKey(login.Username))
+            return Unauthorized("Invalid credentials");
 
-            return Ok(new
-            {
-                token = token
-            });
-        }
+        var user = users[login.Username];
 
-        return Unauthorized();
-        
+        var PasswoordValid = _userService.VerifyPassword(login.Password, user.PasswordHash);
+
+        if(!PasswoordValid)
+            return Unauthorized("Invalid credentials");
+
+        var token = GenerateJwtToken(login.Username, user.Role);
+
+        return Ok(new { token });   
+
     }
 
 

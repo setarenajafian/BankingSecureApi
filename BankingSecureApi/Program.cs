@@ -1,3 +1,4 @@
+using BankingSecureApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -11,6 +12,8 @@ builder.Services.AddControllers();
 // Swagger 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserService, UserService>();
 
 // JWT Config
 var key = builder.Configuration["Jwt:Key"];

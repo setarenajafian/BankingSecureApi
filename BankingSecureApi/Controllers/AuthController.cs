@@ -13,17 +13,12 @@ namespace BankingSecureApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase        //request management
+public class AuthController(IConfiguration config, IUserService userService) : ControllerBase        //request management
 {
-    private readonly IConfiguration _config;
-    private readonly IUserService _userService;
+    private readonly IConfiguration _config = config;
+    private readonly IUserService _userService = userService;
 
-    public AuthController(IConfiguration config,IUserService userService)
-    {
-        _config = config;
-        _userService = userService;
-    }
-
+    
     [HttpPost("login")]
     public IActionResult Login([FromBody] Models.LoginRequest login)
     {

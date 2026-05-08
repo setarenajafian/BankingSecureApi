@@ -26,41 +26,54 @@ public class AuthController : ControllerBase
     {
         if (login.Username == "admin" && login.Password == "Aa123")
         {
-            var token = GenerateJwtToken(login.Username);
+            var token = GenerateJwtToken("admin","Admin");
 
             return Ok(new
             {
-                token = token,
-                expires = DateTime.UtcNow.AddMinutes(
-                    Convert.ToDouble(_config["Jwt:ExpireMinutes"]))
+                token = token
+            });
+        }
+        if ( login.Username == "setare" && login.Password == "Aa123")
+        {
+            var token = GenerateJwtToken("setare", "User");
+
+            return Ok(new
+            {
+                token = token
             });
         }
 
-        return Unauthorized(new { message = "Invalid username or password" });
+        return Unauthorized();
+        
     }
 
 
-    private string GenerateJwtToken(string username)
+    private string GenerateJwtToken(string username , string role)
     {
-        var securityKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var jwtSettings = _config.GetSection("jwt");
 
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var Key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+
+
+        var credentials = new SigningCredentials(Key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-        new Claim(ClaimTypes.Name, username),
-        
-    };
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, role)
+
+        };
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
             claims: claims,
             expires : DateTime.UtcNow.AddMinutes(
-                Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
+                Convert.ToDouble(jwtSettings["ExpireMinutes"])),
             signingCredentials: credentials
         );
+
 
         return new JwtSecurityTokenHandler().WriteToken(token);
 

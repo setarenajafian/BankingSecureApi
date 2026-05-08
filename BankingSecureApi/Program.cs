@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +42,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+
+builder.Services.AddRateLimiter(Options =>
+{
+    Options.AddFixedWindowLimiter("api", limiterOptions =>
+    {
+        //حداکثر درخواست در بازه زمانی
+        limiterOptions.PermitLimit = 10;
+        //بازه زمانی
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        //اگر تعداد درخواست زیاد شد چندتا در صف بمانند
+        limiterOptions.QueueLimit = 10;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
 
 var app = builder.Build();
 

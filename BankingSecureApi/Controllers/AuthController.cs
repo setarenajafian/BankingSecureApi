@@ -8,11 +8,13 @@ using System.Security.Claims;
 using System.Text;
 using BankingSecureApi.Models;
 using BankingSecureApi.Services;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BankingSecureApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableRateLimiting("api")]
 public class AuthController(IConfiguration config, IUserService userService, ILogger logger) : ControllerBase        //request management
 {
     private readonly IConfiguration _config = config;

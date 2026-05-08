@@ -58,6 +58,19 @@ builder.Services.AddRateLimiter(Options =>
     });
 });
 
+
+//configure secure CORS policy to restrict API access to trusted origins
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TrustedOrigins", policy =>
+    {
+        policy.WithOrigins("https://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
 
 // Swagger
@@ -81,6 +94,10 @@ app.Use(async (context, next) =>
 
     await next();
 });
+
+
+app.UseCors("TrustedOrigins");
+
 
 app.UseAuthentication();
 app.UseAuthorization();

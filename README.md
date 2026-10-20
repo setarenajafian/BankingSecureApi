@@ -35,6 +35,24 @@ This project focuses on implementing common security mechanisms used in modern A
 | **Docs** | Swagger / OpenAPI documentation |
 
 ---
+---
+
+## 📚 Related Research
+
+This project is related to the research paper published by the project author on secure Web API architecture in banking financial systems.
+
+[**A Comprehensive Secure Architecture for Web APIs: A Case Study on Banking Financial Systems**](https://civilica.com/doc/2708210)
+
+- **Author:** Setare Najafian
+- **Publication Type:** Conference Paper
+- **Published on:** Civilica
+- **Conference:** The Second International Conference on Modern Studies in Computers, Information Technology and Artificial Intelligence
+
+[View the paper on Civilica](https://civilica.com/doc/728230)
+
+---
+
+
 
 ## 🛠 Technologies Used
 
@@ -57,8 +75,8 @@ This project focuses on implementing common security mechanisms used in modern A
 ### Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/SecureApiArchitecture.git
-cd SecureApiArchitecture
+git clone https://github.com/setarenajafian/BankingSecureApi.git
+cd BankingSecureApi
 ```
 
 ### Run the project
